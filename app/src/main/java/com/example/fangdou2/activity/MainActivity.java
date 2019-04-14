@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,46 +17,75 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fangdou2.R;
 import com.example.fangdou2.fragment.ListViewFragment;
 import com.example.fangdou2.fragment.MapFragment;
-import com.gyf.barlibrary.ImmersionBar;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
+
 public class MainActivity extends AppCompatActivity
 {
+
+    @BindView(R.id.MainView)
+    LinearLayout MainView;
+    @BindView(R.id.fl_fragment)
+    FrameLayout flFragment;
+
+    @BindView(R.id.tv1)
+    TextView tv1;
+    @BindView(R.id.ll_tab1)
+    LinearLayout llTab1;
+    @BindView(R.id.tv2)
+    TextView tv2;
+    @BindView(R.id.ll_tab2)
+    LinearLayout llTab2;
+    @BindView(R.id.ll)
+    LinearLayout ll;
     // 要申请的权限
     private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
     private String tips = "";
     private boolean flag = true;
     private AlertDialog dialog;
-    private ImmersionBar mImmersionBar;
     private BottomNavigationView bottomNavigationView;
     private int lastfragment;
     private Fragment fragment[];
 
     private String app_id = "5c6e22da";
-    private MapFragment mapFragment;
-    private ListViewFragment listFragment;
+    public static MapFragment mapFragment;
+    public static ListViewFragment listFragment;
+
+    private List<TextView> tv_list;
+    private Unbinder unbinder;
+    private Fragment fragment_now = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
+        initBottom();
         StringBuffer param = new StringBuffer();
         param.append("appid=" + app_id);
         param.append(",");
         // 设置使用v5+
         param.append(SpeechConstant.ENGINE_MODE + "=" + SpeechConstant.MODE_MSC);
         SpeechUtility.createUtility(this, param.toString());
-//        mImmersionBar = ImmersionBar.with(this);
-//        mImmersionBar.init();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
             for (int i = 0; i < permissions.length; i++)
@@ -77,8 +107,6 @@ public class MainActivity extends AppCompatActivity
                 showDialogTipUserRequestPermission();
             }
         }
-        initFragment();
-
     }
 
     private void showDialogTipUserRequestPermission()
@@ -187,7 +215,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == 123)
         {
 
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             {
                 // 检查该权限是否已经获取
                 int i = ContextCompat.checkSelfPermission(this, permissions[0]);
@@ -209,73 +237,108 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void initFragment()
+    public void initBottom()
     {
-
-        mapFragment = new MapFragment();
-        listFragment = new ListViewFragment();
-        fragment = new Fragment[]{mapFragment, listFragment};
-        lastfragment = 0;
-        getSupportFragmentManager().beginTransaction().replace(R.id.MainView, mapFragment).show(mapFragment).commit();
-        bottomNavigationView = findViewById(R.id.bnv);
-        bottomNavigationView.setOnNavigationItemSelectedListener(changeFragment);
+        tv_list = new ArrayList<>();
+        tv_list.add(tv1);
+        tv_list.add(tv2);
+        changePageSelect(0);
+        changePageFragment(R.id.ll_tab1);
     }
 
+    public void changePageSelect(int index)
+    {
+        for (int i = 0; i < tv_list.size(); i++)
+        {
+            if (index == i)
+            {
+                tv_list.get(i).setTextColor(Color.parseColor("#ece638"));
+            } else
+            {
+                tv_list.get(i).setTextColor(Color.parseColor("#000000"));
+            }
+        }
+    }
+
+    public void changePageFragment(int id)
+    {
+        switch (id)
+        {
+            case R.id.ll_tab1:
+            case R.id.tv1:
+                if (mapFragment == null)
+                {//减少new fragment,避免不必要的内存消耗
+                    mapFragment = new MapFragment();
+                    listFragment = new ListViewFragment();
+                    switchFragment(fragment_now, listFragment);
+                }
+                changePageSelect(0);
+                switchFragment(fragment_now, mapFragment);
+                tv1.setBackgroundResource(R.drawable.bottom_cornerbackground_y);
+                tv1.setTextColor(Color.parseColor("#000000"));
+                tv2.setBackgroundResource(R.drawable.bottom_cornerbackground_n);
+                tv2.setTextColor(Color.parseColor("#ece638"));
+                break;
+            case R.id.ll_tab2:
+            case R.id.tv2:
+                if (listFragment == null)
+                {
+                    listFragment = new ListViewFragment();
+                }
+                changePageSelect(1);
+                switchFragment(fragment_now, listFragment);
+                tv1.setBackgroundResource(R.drawable.bottom_cornerbackground_n);
+                tv1.setTextColor(Color.parseColor("#ece638"));
+                tv2.setBackgroundResource(R.drawable.bottom_cornerbackground_y);
+                tv2.setTextColor(Color.parseColor("#000000"));
+                break;
+
+        }
+    }
+
+    public void switchFragment(Fragment from, Fragment to)
+    {
+        if (to == null)
+            return;
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if (!to.isAdded())
+        {
+            if (from == null)
+            {
+                transaction.add(R.id.fl_fragment, to).show(to).commit();
+            } else
+            {
+                // 隐藏当前的fragment，add下一个fragment到Activity中并显示
+                transaction.hide(from).add(R.id.fl_fragment, to).show(to).commitAllowingStateLoss();
+            }
+        } else
+        {
+            // 隐藏当前的fragment，显示下一个
+            if (!from.equals(to))
+            {
+                transaction.setCustomAnimations(R.animator.slide_left_in, R.animator.slide_left_out, R.animator.slide_right_out, R.animator.slide_right_in);
+                if (from == mapFragment)
+                    transaction.hide(from).show(to).commit();
+                else
+                    transaction.hide(from).show(to).commit();
+            } else
+                transaction.hide(from).show(to).commit();
+        }
+        fragment_now = to;
+
+    }
 
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
-        if (mImmersionBar != null)
-            mImmersionBar.destroy();
+        //解除绑定
+        unbinder.unbind();
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener changeFragment = new BottomNavigationView.OnNavigationItemSelectedListener()
+    @OnClick({R.id.tv1, R.id.ll_tab1, R.id.tv2, R.id.ll_tab2})
+    public void onViewClicked(View view)
     {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item)
-        {
-
-            switch (item.getItemId())
-            {
-                case R.id.id1:
-                {
-                    if (lastfragment != 0)
-                    {
-                        switchFragment(lastfragment, 0);
-                        lastfragment = 0;
-                    }
-
-                    return true;
-                }
-                case R.id.id2:
-                {
-                    if (lastfragment != 1)
-                    {
-                        switchFragment(lastfragment, 1);
-                        lastfragment = 1;
-                    }
-
-                    return true;
-                }
-
-
-            }
-
-
-            return false;
-        }
-    };
-
-    private void switchFragment(int lastfragment, int index)
-    {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.hide(fragment[lastfragment]);//隐藏上个Fragment
-        if (!fragment[index].isAdded())
-        {
-            transaction.add(R.id.MainView, fragment[index]);
-        }
-        transaction.show(fragment[index]).commitAllowingStateLoss();
+        changePageFragment(view.getId());
     }
-
 }

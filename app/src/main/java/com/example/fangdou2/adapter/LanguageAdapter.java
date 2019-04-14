@@ -1,7 +1,7 @@
 package com.example.fangdou2.adapter;
 
 import android.view.LayoutInflater;
-import android.view.*;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
@@ -17,6 +17,12 @@ public class LanguageAdapter extends BaseAdapter implements View.OnClickListener
     private List<LanguageItemBean> mList;
     private LayoutInflater layoutInflater;
     private Callback mCallback;
+    private ViewHolder viewHolder;
+
+    public ViewHolder getViewHolder()
+    {
+        return viewHolder;
+    }
 
     public LanguageAdapter(List<LanguageItemBean> mList, LayoutInflater layoutInflater, Callback callback)
     {
@@ -51,11 +57,12 @@ public class LanguageAdapter extends BaseAdapter implements View.OnClickListener
         {
             viewHolder = new ViewHolder();
             convertView = layoutInflater.inflate(R.layout.languageitem, null);
-            viewHolder.textView = (TextView) convertView.findViewById(R.id.languageItem_text);
+            viewHolder.textView = convertView.findViewById(R.id.languageItem_text);
             convertView.setTag(viewHolder);
         } else
         {
             viewHolder = (ViewHolder) convertView.getTag();
+            this.viewHolder = viewHolder;
         }
         final LanguageItemBean bean = mList.get(position);
         viewHolder.textView.setText(bean.itemContent);
@@ -66,18 +73,18 @@ public class LanguageAdapter extends BaseAdapter implements View.OnClickListener
         return convertView;
     }
 
-    public interface Callback
-    {
-        public void click(View v);
-    }
-
     @Override
     public void onClick(View v)
     {
         mCallback.click(v);
     }
 
-    class ViewHolder
+    public interface Callback
+    {
+        void click(View view);
+    }
+
+    public class ViewHolder
     {
         public TextView textView;
     }

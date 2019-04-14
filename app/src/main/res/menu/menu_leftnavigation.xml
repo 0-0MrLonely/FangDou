@@ -2,14 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item
-        android:id="@+id/id1"
-        android:title="DIY语音合成" />
-    <item
-        android:id="@+id/id2"
-        android:title="菜单项2" />
-    <item
-        android:id="@+id/id3"
-        android:title="菜单项3" />
+    <item android:title="DIY语音合成" />
+    <item android:title="我的收藏/点赞" />
+    <item android:title="个人设置" />
+    <item android:title="主题" />
 
 </menu>

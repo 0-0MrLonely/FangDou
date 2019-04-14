@@ -14,11 +14,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fangdou2.MyDrawerLayout;
 import com.example.fangdou2.MyListView;
 import com.example.fangdou2.R;
+import com.example.fangdou2.activity.ThemeActivity;
 import com.example.fangdou2.adapter.LanguageAdapter;
 import com.example.fangdou2.bean.LanguageItemBean;
 
@@ -27,14 +29,14 @@ import java.util.ArrayList;
 public class MapFragment extends Fragment implements LanguageAdapter.Callback
 {
     private View view;
-    private String language_item[];
+    private String language_item[], language_pinyin[];
     private ArrayList<LanguageItemBean> arrayList;
     public static MyListView listView;
-    private int locate;
     private InfoFragment infoFragment;
     private MyDrawerLayout drawerLayout;
     private NavigationView navigationView;
     private ActionBarDrawerToggle mDrawerToggle;
+    public static Toolbar toolbar;
 
     @Nullable
     @Override
@@ -52,20 +54,20 @@ public class MapFragment extends Fragment implements LanguageAdapter.Callback
         {
             view = inflater.inflate(R.layout.fragment_map, null);
         }
-
         initView();
         return view;
     }
 
     public void initView()
     {
-        //initItem();
         language_item = new String[8];
         language_item = view.getResources().getStringArray(R.array.language_item);
+        language_pinyin = new String[8];
+        language_pinyin = view.getResources().getStringArray(R.array.language_item_pinyin);
         arrayList = new ArrayList<>();
-        for (int i = 0; i < language_item.length; i++)
+        for (String aLanguage_item : language_item)
         {
-            arrayList.add(new LanguageItemBean(language_item[i]));
+            arrayList.add(new LanguageItemBean(aLanguage_item));
         }
         listView = view.findViewById(R.id.language_listView);
         listView.setAdapter(new LanguageAdapter(arrayList, getLayoutInflater(), this));
@@ -76,8 +78,17 @@ public class MapFragment extends Fragment implements LanguageAdapter.Callback
     @Override
     public void click(View v)
     {
-        infoFragment = new InfoFragment("示例文字", "https://x1aolata.github.io/fangdouwangye/index.html");
-        getFragmentManager().beginTransaction().replace(R.id.infoFragment, infoFragment).addToBackStack(null).commit();
+        TextView textView = v.findViewById(R.id.languageItem_text);
+        for (int i = 0; i < language_item.length; i++)
+        {
+            if (textView.getText().toString().equals(language_item[i]))
+            {
+                infoFragment = new InfoFragment(language_item[i], "file:///android_asset/index_" + language_pinyin[i] + ".html");
+                break;
+            }
+        }
+        getFragmentManager().beginTransaction().setCustomAnimations(R.anim.translate_into, R.anim.translate_into)
+                .replace(R.id.infoFragment, infoFragment).addToBackStack(null).commit();
 
     }
 
@@ -95,11 +106,13 @@ public class MapFragment extends Fragment implements LanguageAdapter.Callback
             }
         });
         /*下面是toolbar的设置，包括动画*/
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar = view.findViewById(R.id.toolbar);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setTitle("方逗");
         toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.color_default));
+        ThemeActivity.setStatusBarColor(getActivity(), getResources().getColor(R.color.color_default));
         ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -134,6 +147,14 @@ public class MapFragment extends Fragment implements LanguageAdapter.Callback
                         intent = new Intent("android.intent.action.build");
                         startActivity(intent);
                         break;
+                    case "我的收藏/点赞":
+                    case "个人设置":
+                        Toast.makeText(view.getContext(), "敬请期待！", Toast.LENGTH_LONG).show();
+                        break;
+                    case "主题":
+                        intent = new Intent("android.intent.action.theme");
+                        startActivity(intent);
+                        break;
                     default:
                         break;
                 }
@@ -143,6 +164,5 @@ public class MapFragment extends Fragment implements LanguageAdapter.Callback
 
         });
     }
-
 
 }

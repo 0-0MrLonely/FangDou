@@ -14,9 +14,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
+            android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:layout_scrollFlags="scroll|enterAlways"
+            app:layout_scrollFlags="scroll"
+
             app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
         </android.support.v7.widget.Toolbar>
@@ -29,38 +31,54 @@
         android:layout_height="match_parent"
         android:background="#ffffff">
 
-        <android.support.v4.widget.NestedScrollView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:orientation="vertical">
 
-            <com.example.fangdou2.MyListView
-                android:id="@+id/listView"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </android.support.v4.widget.NestedScrollView>
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/color_default"
+                android:gravity="center"
+                android:text="方逗广场"
+                android:textColor="#ffffff"
+                android:textSize="40sp" />
 
-        <FrameLayout
-            android:id="@+id/fram"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#716B6B" />
 
-        </FrameLayout>
+            <android.support.v4.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/color_default"
+                android:fillViewport="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <com.example.fangdou2.MyListView
+                    android:id="@+id/listView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#22221E" />
+            </android.support.v4.widget.NestedScrollView>
+
+        </LinearLayout>
 
         <android.support.design.widget.NavigationView
             android:id="@+id/nav"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"
+            android:background="@color/color_default"
             android:fitsSystemWindows="true"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:scrollbars="horizontal"
+            app:itemTextColor="#ffffff"
             app:menu="@menu/menu_language">
 
         </android.support.design.widget.NavigationView>
-
-
     </com.example.fangdou2.MyDrawerLayout>
 </android.support.design.widget.CoordinatorLayout>

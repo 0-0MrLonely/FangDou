@@ -8,6 +8,8 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.example.fangdou2.bean.CityPath;
 import com.example.fangdou2.bean.ViewAttr;
@@ -17,9 +19,6 @@ import com.example.fangdou2.utils.SVGXmlParserUtils;
 
 import java.util.List;
 
-/**
- * Created by zhangjd on 2017/6/1.
- */
 
 public class MapView extends View implements ParserCallBack
 {
@@ -27,12 +26,14 @@ public class MapView extends View implements ParserCallBack
     private ViewAttr mViewAttr;
     private Paint mPaint;
     private Path mPath;
-    private float scale = 0.5f;
+    private float scaleX = 0.3f, scaleY = 0.3f;
     private int viewWidth;
     private int viewHeight;
     //是否计算完成
     private boolean isCalculation;
     private String string[];
+    public static int status = 0;
+    private String[] language_item;
 
 
     public MapView(Context context)
@@ -91,7 +92,7 @@ public class MapView extends View implements ParserCallBack
         //解析svg xml
         string = new String[8];
         string = getResources().getStringArray(R.array.language_item_pinyin);
-        SVGXmlParserUtils.parserXml(getResources().openRawResource(R.raw.pic_background_n), this);
+        SVGXmlParserUtils.parserXml(getResources().openRawResource(R.raw.pic_background), this);
     }
 
     @Override
@@ -111,14 +112,9 @@ public class MapView extends View implements ParserCallBack
         {
             return;
         }
-        //        Matrix mMatrix = new Matrix();
-//        mMatrix.postScale(0.5f,0.5f);
-        //这个set方法不可以
-//        mMatrix.setScale(0.5f,0.5f);
-//        canvas.concat(mMatrix);
-        //上面的方法也可以
-//        canvas.restore();
-        canvas.scale(scale, scale);
+
+        canvas.scale(scaleX, scaleY);
+        //缩放
         canvas.drawColor(getResources().getColor(R.color.color_mapBackground));
         for (int i = 0; i < list.size(); i++)
         {
@@ -126,16 +122,15 @@ public class MapView extends View implements ParserCallBack
             //绘制边的颜色
             mPaint.setStrokeWidth(5);
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setColor(Color.BLACK);
+            mPaint.setColor(Color.parseColor("#ffffff"));
             canvas.drawPath(path.getmPath(), mPaint);
         }
         if (mPath != null)
         {
-            mPaint.setStrokeWidth(1);
-            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setStrokeWidth(6);
+            mPaint.setStyle(Paint.Style.STROKE);
             mPaint.setColor(getResources().getColor(R.color.color_mapSelected));
             canvas.drawPath(mPath, mPaint);
-            System.out.println(mPath + "....." + mPaint);
         }
 
     }
@@ -143,7 +138,7 @@ public class MapView extends View implements ParserCallBack
     @Override
     public void callback(List<CityPath> list, ViewAttr mViewAttr)
     {
-        this.list = list;
+        MapView.list = list;
         this.mViewAttr = mViewAttr;
         myDraw();
     }
@@ -154,10 +149,7 @@ public class MapView extends View implements ParserCallBack
         {
             if (mViewAttr.getWidth() > 0 && mViewAttr.getHeight() > 0 && viewWidth > 0 && viewHeight > 0)
             {
-                isCalculation = true;
-                float widthScale = viewWidth * 1.00f / mViewAttr.getWidth();
-                float heightScale = viewHeight * 1.00f / mViewAttr.getHeight();
-                scale = Math.min(widthScale, heightScale);
+                scaleX = scaleY = 0.85f;
             }
             postInvalidate();
         }
@@ -168,17 +160,29 @@ public class MapView extends View implements ParserCallBack
     {
         if (event.getAction() == MotionEvent.ACTION_DOWN)
         {
+            language_item = getResources().getStringArray(R.array.language_item);
             float x = event.getX();
             float y = event.getY();
             if (list != null)
                 for (int i = 0; i < list.size(); i++)
                 {
                     CityPath cityPath = list.get(i);
-                    if (cityPath.isArea(x / scale, y / scale))
+                    if (cityPath.isArea(x / scaleX, y / scaleY))
                     {
+                        status = initList(cityPath);
                         mPath = cityPath.getmPath();
                         postInvalidate();
-                        MapFragment.listView.smoothScrollToPosition(initList(cityPath));
+                        MapFragment.listView.smoothScrollToPosition(status);
+                        MapFragment.listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+                        {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+                            {
+                                Toast.makeText(view.getContext(), "这里是" + language_item[status], Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        MapFragment.listView.performItemClick(MapFragment.listView.getAdapter().getView(0, null, null),
+                                status, MapFragment.listView.getId());
                         break;
                     }
                 }
@@ -193,6 +197,7 @@ public class MapView extends View implements ParserCallBack
         {
             if (cityPath.getTitle().equals(string[i]))
             {
+                System.out.println(cityPath.getTitle());
                 return i;
             }
         }

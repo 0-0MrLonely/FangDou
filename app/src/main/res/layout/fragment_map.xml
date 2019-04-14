@@ -15,9 +15,9 @@
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:fitsSystemWindows="true"
             app:layout_scrollFlags="scroll"
             app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
-
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
@@ -30,12 +30,11 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFFFFF"
+            android:background="@color/color_default"
             android:clickable="true">
 
 
             <LinearLayout
-                android:id="@+id/map_Fragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
@@ -48,7 +47,7 @@
                     <com.example.fangdou2.MapView
                         android:layout_width="match_parent"
                         android:layout_height="350dp"
-                        android:layout_marginTop="20dp" />
+                        android:layout_marginTop="60dp" />
 
                 </FrameLayout>
 
@@ -61,10 +60,12 @@
 
                     <com.example.fangdou2.MyListView
                         android:id="@+id/language_listView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="350dp"
+                        android:layout_gravity="center"
                         android:layout_height="wrap_content"
                         android:background="@drawable/item_cornerbackground"
                         android:fadingEdgeLength="100dp"
+                        android:listSelector="@android:color/transparent"
                         android:requiresFadingEdge="vertical" />
                 </android.support.v4.widget.NestedScrollView>
 
@@ -72,11 +73,11 @@
 
             <FrameLayout
                 android:id="@+id/infoFragment"
-                android:layout_width="300dp"
-                android:layout_height="600dp"
+                android:layout_width="340dp"
+                android:layout_height="580dp"
                 android:layout_gravity="center"
+                android:layout_marginTop="20dp"
                 android:orientation="vertical">
-
             </FrameLayout>
         </FrameLayout>
 
@@ -85,8 +86,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:background="#616161"
             android:fitsSystemWindows="true"
             app:headerLayout="@layout/headlayout"
+            app:itemTextColor="#ffffff"
             app:menu="@menu/menu_leftnavigation" />
     </com.example.fangdou2.MyDrawerLayout>
 
